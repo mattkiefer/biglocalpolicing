@@ -1,0 +1,40 @@
+---
+title: "exploratory analysis"
+author: "Michael Spencer"
+date: "10/20/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Setup
+
+### Load Libraries
+```{r}
+library(tidyverse)
+```
+
+### Parameters
+```{r}
+ok_city_path <- "data/ok_oklahoma_city_2019_08_13.csv"
+```
+
+### Load Data
+```{r}
+ok_city_data <- 
+	ok_city_path %>% 
+	read_csv()
+```
+
+```{r}
+ok_city_data %>% 
+	head()
+```
+
+```{r}
+ok_city_data %>% 
+	count(subject_race, raw_dfnd_race)
+```
+
