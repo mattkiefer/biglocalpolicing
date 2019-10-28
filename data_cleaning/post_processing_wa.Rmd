@@ -1,0 +1,53 @@
+---
+title: "post_processing_wa"
+author: "Michael Spencer"
+date: "10/23/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Cleaning half-processed data that was retrieved via the opp processing script. Errors in the script meant running it gave data that has yet to clean enforcements or violations, and has not been sanitized. In this script, we aim to do just that, ideally replicating what the opp processing script would have done had errors not occured. This document will be made into a R script for quicker processing since the dataset is fairly slow locally.
+
+Altered opp scripts include:
+
+* wa/statewide.R (circumvented violation, enforcement, and calculated columns processing)
+* standardize.R (circumvented schema columns, enforcing types, predicate correction, all santizing)
+* opp.R and utils.R added print statements
+
+## Setup
+
+### Libraries
+```{r}
+library(tidyverse)
+library(here)
+```
+
+### Parameters
+```{r}
+path_data <- paste0(here(), "/data")
+path_data_states <- paste0(path_data, "/states")
+```
+
+### Load Data
+```{r}
+# Loads half processed data that came from running modified opp script
+
+data_wa_raw <-
+	paste0(path_data_states, "/wa/statewide.rds") %>% 
+	read_rds()
+```
+
+```{r}
+data_wa_raw <- data_wa_raw$data
+```
+
+## Clean Data
+
+### Clean Enforcements
+
+### Clean Violations
+
+### Fix Calculated Columns (see script to do so)
