@@ -1,0 +1,335 @@
+################################################################################
+## Project: Big Local: Policing Reservation
+## Script purpose: Cleaning half-processed data that was retrieved via the opp processing script. 
+## Errors in the script meant running it gave data that has yet to clean enforcements or violations, 
+## and has not been sanitized. In this script, we aim to do just that, ideally replicating what 
+## the opp processing script would have done had errors not occured. 
+## Date: 2019-10-27
+## Author: Michael Spencer
+
+## Additional Notes: Altered opp scripts include:
+## * wa/statewide.R (circumvented violation, enforcement, and calculated columns processing)
+## * standardize.R (circumvented schema columns, enforcing types, predicate correction, all santizing)
+## * opp.R and utils.R added print statements
+
+## To replicate this exact processrequires the opp repository and the relevant 
+## altered scripts above. Further work will be done to make this process clearer
+## reproducible.
+################################################################################
+
+## Setup
+
+### Libraries
+if (!require(tidyverse)) install.packages("tidyverse")
+library(tidyverse)
+
+### Parameters
+path_data <- paste0(here::here(), "/data")
+path_data_states <- paste0(path_data, "/states")
+
+### Functions
+first_of <- function(..., default = NA) {
+	tbl <- cbind(..., "__default" = TRUE)
+	nms <- colnames(tbl)
+	v <- nms[apply(tbl, 1, which.max)]
+	str_replace(v, "__default", as.character(default))
+}
+
+# Load and Clean Data
+# Loads half processed data that came from running modified opp script
+
+data <-
+	paste0(path_data_states, "/wa/statewide.rds") %>% 
+		read_rds() %>% 
+		.$data
+
+data %>% 
+	
+	# cleans enforcements
+	unite("all_enforcements", starts_with("enforcement_"), sep = ",") %>% 
+	mutate(
+		all_enforcements_big = str_replace_all(all_enforcements, pattern = "NA|,", ""),
+		
+		# cleans driver race and captures raw values
+		raw_driver_race_big = case_when(
+			raw_driver_race == "1" ~ "white",
+			raw_driver_race == "2" ~ "black",
+			raw_driver_race == "3" ~ "native american",
+			raw_driver_race == "4" ~ "Asian", # Asian
+			raw_driver_race == "5" ~ "pacific islander", # Pacific Islander
+			raw_driver_race == "6" ~ "east indian", # East Indian
+			raw_driver_race == "7" ~ "hispanic",
+			raw_driver_race == "8" ~ "other" # Other
+		),
+		
+		# cleans stop reason
+		stop_reason_big = case_when(
+			raw_contact_type == "01"  ~ 'Self-Initiated Contact',
+			raw_contact_type == "02"  ~ 'Calls for service',
+			raw_contact_type == "04"  ~ 'Collisions',
+			raw_contact_type == "05"  ~ 'Collisions enf. follow-up',
+			raw_contact_type == "06"  ~ 'Other enf. follow-up',
+			raw_contact_type == "07"  ~ 'Aggressive driving',
+			raw_contact_type == "08"  ~ 'Road rage',
+			raw_contact_type == "09"  ~ 'Emphasis patrol',
+			raw_contact_type == "10"  ~ 'CMV inspect/weighing',
+			raw_contact_type == "12"  ~ 'Self-Initiated Physical Assist',
+			raw_contact_type == "13"  ~ 'Distracted driving',
+			raw_contact_type == "20"  ~ NA_character_
+		)
+	) %>% 
+	mutate_at(
+		
+		# cleans violations
+		vars(starts_with("violation_")),
+		~case_when(
+			. == "1"    ~ "DUI - With test",
+			. == "10"   ~ "Right of way",
+			. == "100"  ~ "Smoke Marijuana Public",
+			. == "101"  ~ "DUI - Drugs W/Test",
+			. == "102"  ~ "DUI - Drugs No Test",
+			. == "103"  ~ "DUI - Under Age W/Test",
+			. == "104"  ~ "DUI - Under Age No Test",
+			. == "105"  ~ "Alcohol in Sys W/Test",
+			. == "106"  ~ "Alcohol in Sys W/O Test",
+			. == "107"  ~ "Interlock Device (DUI)",
+			. == "108"  ~ "Veh Hom - DUI/Drug",
+			. == "109"  ~ "Veh Assault - DUI/Drug",
+			. == "11"   ~ "Centerline",
+			. == "110"  ~ "Move Over Law",
+			. == "112"  ~ "Left Lane Travel",
+			. == "12"   ~ "Lane Travel",
+			. == "13"   ~ "Shoulder",
+			. == "14"   ~ "Divider/Barrier",
+			. == "148"  ~ "Intermediate Driver Liscence",
+			. == "149"  ~ "Out of state vehicle lic.",
+			. == "15"   ~ "Passing",
+			. == "150"  ~ "Oper Liscence - C",
+			. == "151"  ~ "Vehicle Lic (tabs/plates)",
+			. == "152"  ~ "Vehicle registration (paper)",
+			. == "153"  ~ "Debris - Thrown",
+			. == "154"  ~ "Debris - Lighted",
+			. == "155"  ~ "Over Llgl Gross",
+			. == "156"  ~ "Over Axle",
+			. == "157"  ~ "Over Tires",
+			. == "158"  ~ "Over Lic Capacity",
+			. == "159"  ~ "Valid Tonnage",
+			. == "16"   ~ "Signal",
+			. == "160"  ~ "Over Length",
+			. == "161"  ~ "Over Width",
+			. == "162"  ~ "Over Height",
+			. == "163"  ~ "Use Fuel",
+			. == "164"  ~ "Permit:  Spec - None",
+			. == "165"  ~ "Permit:  Spec - Size",
+			. == "166"  ~ "Permit:  Spec - Wght",
+			. == "167"  ~ "Over Axle Spcng",
+			. == "168"  ~ "Over Lgl & Pmt AT",
+			. == "169"  ~ "Over Lgl & Pmt LT",
+			. == "17"   ~ "Turning",
+			. == "170"  ~ "Permit:  Forest",
+			. == "171"  ~ "Permit:  Comn Carr",
+			. == "173"  ~ "Child Restraint",
+			. == "174"  ~ "Safety Belt",
+			. == "175"  ~ "HOV Violations",
+			. == "176"  ~ "Parking/Campus",
+			. == "177"  ~ "Trip Permit - None",
+			. == "178"  ~ "License Susp/Rev 1st Deg",
+			. == "179"  ~ "Failiure to Appear",
+			. == "18"   ~ "Stop Sign",
+			. == "180"  ~ "Medical Certificate",
+			. == "181"  ~ "Oper Licence - I",
+			. == "182"  ~ "Insurance - None",
+			. == "183"  ~ "M/C Helmet",
+			. == "184"  ~ "License Susp/Rev 2nd Deg",
+			. == "185"  ~ "License Susp/Rev 3rd Deg",
+			. == "186"  ~ "Habitual Traffic Offender",
+			. == "187"  ~ "M/C Endorsement",
+			. == "19"   ~ "Traffic Light",
+			. == "198"  ~ "Other Non-Hazd/I",
+			. == "199"  ~ "OtherNon-Hazd/C",
+			. == "2"    ~ "DUI - W/O Test",
+			. == "20"   ~ "Restrictive Sign",
+			. == "200"  ~ "Business Inspections",
+			. == "201"  ~ "Vehicle Dealer",
+			. == "202"  ~ "Aircraft Registration",
+			. == "203"  ~ "Hulk Hauler",
+			. == "204"  ~ "Scrap Processor",
+			. == "205"  ~ "Tow Truck Company",
+			. == "206"  ~ "Fuel System",
+			. == "207"  ~ "Suspension System",
+			. == "21"   ~ "Headlights Dim",
+			. == "22"   ~ "Light Violations",
+			. == "23"   ~ "Headlights - None",
+			. == "24"   ~ "Log Book - Prv Carr",
+			. == "25"   ~ "Secure Load",
+			. == "26"   ~ "Brakes",
+			. == "27"   ~ "Steering",
+			. == "28"   ~ "Tires",
+			. == "29"   ~ "Exhaust",
+			. == "3"    ~ "Neg Driving - 1st Degree",
+			. == "30"   ~ "Excessive Smoke",
+			. == "301"  ~ "Fail to Obtain WA Driver License",
+			. == "31"   ~ "Other Def Equipment",
+			. == "32"   ~ "Parking Viol",
+			. == "33"   ~ "Pedestrian Viol",
+			. == "34"   ~ "Bicycle Violations",
+			. == "35"   ~ "Hitchhiking",
+			. == "36"   ~ "RR Crossing",
+			. == "37"   ~ "Lane Change",
+			. == "38"   ~ "Backing",
+			. == "39"   ~ "Log Book - Reg Carr",
+			. == "4"    ~ "Speed",
+			. == "40"   ~ "Wheels",
+			. == "41"   ~ "Frame",
+			. == "42"   ~ "Coupling",
+			. == "43"   ~ "Warning Device",
+			. == "44"   ~ "Debris - Escape",
+			. == "45"   ~ "Uncovered Load",
+			. == "46"   ~ "Reckless Driving",
+			. == "47"   ~ "Hit and run",
+			. == "48"   ~ "Vehicle Homicide",
+			. == "49"   ~ "Vehicular Assault",
+			. == "5"    ~ "Speed - Aircraft",
+			. == "50"   ~ "HOV Hot lane",
+			. == "51"   ~ "Hazmat Violations",
+			. == "52"   ~ "Toll evasion",
+			. == "53"   ~ "Neg Driving - 2nd Degree",
+			. == "54"   ~ "Cell phone - Text",
+			. == "55"   ~ "Cell phone - Handheld",
+			. == "6"    ~ "Speed - Radar",
+			. == "60"   ~ "Fail to Carry Chains",
+			. == "61"   ~ "Fail to Chain",
+			. == "62"   ~ "Burglary",
+			. == "63"   ~ "Danger Weapons",
+			. == "64"   ~ "Disorderly Conduct",
+			. == "65"   ~ "Drink in public",
+			. == "66"   ~ "Harassment - Felony",
+			. == "67"   ~ "Harassment - Misdemeanor",
+			. == "68"   ~ "Identity Theft",
+			. == "69"   ~ "Indecent Exposure - Felony",
+			. == "7"    ~ "Speed - Too fast",
+			. == "70"   ~ "Indecent Exposure - Misdemeanor",
+			. == "71"   ~ "Intimid Pub Serv - Felony",
+			. == "72"   ~ "No contct/Rest Order - Felony",
+			. == "73"   ~ "No contct/Rest Order - Misdemeanor",
+			. == "74"   ~ "Obstructing",
+			. == "75"   ~ "Physical Assault - Felony",
+			. == "76"   ~ "Physical Assault - Misdemeanor",
+			. == "77"   ~ "Pos Stolen Prop - Felony",
+			. == "78"   ~ "Pos Stolen Prop - Misdemeanor",
+			. == "79"   ~ "Skateboarding",
+			. == "8"    ~ "Impeding Traffic",
+			. == "80"   ~ "Theft - Felony",
+			. == "81"   ~ "Theft - Misdemeanor",
+			. == "82"   ~ "Trespassing",
+			. == "83"   ~ "Vandalism - Felony",
+			. == "84"   ~ "Vandalism - Misdemeanor",
+			. == "85"   ~ "Vehicle Prowl - Felony",
+			. == "86"   ~ "Vehicle Prowl - Misdemeanor",
+			. == "87"   ~ "Fail to Disperse",
+			. == "88"   ~ "Riot - Felony",
+			. == "89"   ~ "Riot - Misdemeanor",
+			. == "897"  ~ "Redeem Impound",
+			. == "9"    ~ "Follow close",
+			. == "90"   ~ "Domestic Viol - Felony",
+			. == "900"  ~ "Open Container",
+			. == "901"  ~ "Minor in possession",
+			. == "902"  ~ "Liquor to Minor",
+			. == "903"  ~ "Vehicle theft",
+			. == "904"  ~ "Drugs - Felony",
+			. == "905"  ~ "Felony Flight - Elude",
+			. == "906"  ~ "Misdemeanor Warrant",
+			. == "907"  ~ "Felony Warrant",
+			. == "908"  ~ "Drugs - Misdemeanor",
+			. == "909"  ~ "Stolen Veh. Recovered",
+			. == "91"   ~ "Domestic Viol - Misdemeanor",
+			. == "910"  ~ "Weapons Violation - Felony",
+			. == "911"  ~ "Weapons Violation - Misdemeanor",
+			. == "914"  ~ "Drugs Paraphernalia - Felony",
+			. == "918"  ~ "Drugs Paraphernalia - Misdemeanor",
+			. == "997"  ~ "Non-Traffic Vltn/I",
+			. == "998"  ~ "Non-Traffic Vltn/C",
+			. == "999"  ~ "Non-Traffic Vltn/F",
+			. == "98"   ~ "Other violations - I",
+			. == "99"   ~ "Other violations - C"
+		)
+	) %>% 
+	unite("all_violations", starts_with("violation_"), sep = ",") %>% 
+	mutate(
+		all_violations_big = 
+			str_replace_all(all_violations, pattern = "NA", replacement = "") %>% 
+			str_replace_all(pattern = "^,+|,+$", replacement = ""),
+		
+		# calculates arrest made and outcome based on enforcement encoding
+		arrest_made_big = str_detect(all_enforcements_big, "1"),
+		citation_issued_big = str_detect(all_enforcements_big, "1"),
+		warning_issued_big = str_detect(all_enforcements_big, "2|3"),
+		outcome_big = first_of(
+			"citation" = citation_issued_big,
+			"warning" = warning_issued_big
+		)
+	) %>% 
+	
+	# get rid of sensitive information, duplicated information, raw information that
+	# if no longer of use, etc.
+	select(
+		-employee_first,
+		-employee_last,
+		-officer_first_name,
+		-officer_last_name,
+		-raw_officer_race,
+		-raw_officer_gender,
+		-contact_date,
+		-contact_hour,
+		-highway_type.x,
+		-road_number.x,
+		-milepost.x,
+		-raw_contact_type,
+		-raw_driver_race,
+		-driver_age,
+		-raw_driver_gender,
+		-raw_search_type,
+		-X1,
+		-milepost.y,
+		-road_number.y,
+		-highway_type.y,
+		-all_violations,
+		-all_enforcements,
+		-stop_reason,
+		-arrest_made,
+		-citation_issued,
+		-warning_issued,
+		-outcome,
+		-location
+	) %>% 
+	
+	# reorders rows for better interpretation
+	select(
+		raw_row_number,
+		date,
+		time,
+		longitude = "lng",
+		latitude = "lat",
+		county_fips,
+		county_name,
+		officer_race,
+		officer_sex,
+		department_name,
+		type,
+		stop_reason_big,
+		all_enforcements_big,
+		all_violations_big,
+		subject_race,
+		raw_subject_race_big = "raw_driver_race_big",
+		subject_sex,
+		subject_age,
+		contraband_found,
+		frisk_performed,
+		search_basis,
+		search_conducted,
+		arrest_made_big,
+		outcome_big
+	) %>% 
+	
+	# writes to tsv since violations are separated by commas; avoids later errors
+	write_tsv(paste0(path_data_states, "/wa/wa_clean_big.tsv"))
