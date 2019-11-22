@@ -1,0 +1,96 @@
+System Coded Offense,System Offense,Offense Categories Re-code,Offense Categories Description
+1,Careless Driving,2,Motor Vehicle Serious
+2,Driving on Wrong Side of Road,1,Motor Vehicle Hazardous
+3,Driving without Headlights,1,Motor Vehicle Hazardous
+4,Following to Closely,1,Motor Vehicle Hazardous
+6,Improper change of lane or course,1,Motor Vehicle Hazardous
+7,Improper Passing,1,Motor Vehicle Hazardous
+8,Improper Start,1,Motor Vehicle Hazardous
+9,Improper Turn,1,Motor Vehicle Hazardous
+10,Obstructing Roadway,1,Motor Vehicle Hazardous
+12,Speed,1,Motor Vehicle Hazardous
+13,Toll Evasion,1,Motor Vehicle Hazardous
+14,Violation of Right of Way,1,Motor Vehicle Hazardous
+15,Violations of Traffic Control Device,1,Motor Vehicle Hazardous
+16,Null,999,Missing
+20,Exhaust System,3,Equipment
+21,Faulty Equipment,3,Equipment
+23,Loads on Vehicles,5,Commercial
+26,Miscellaneous Motorcycle/Moped,7,Other
+29,Parking  ,7,Other
+33,Other Moving Violations,1,Motor Vehicle Hazardous
+34,DUI,2,Motor Vehicle Serious
+39,Reckless Driving,2,Motor Vehicle Serious
+40,Other Criminal Traffic Violations,1,Motor Vehicle Hazardous
+41,Crimes Against Persons,6,Non-Motor Vehicle
+42,Property Crimes,6,Non-Motor Vehicle
+46,Other Criminal Violations,6,Non-Motor Vehicle
+47,Driving while license suspended,4,License/Registration/Insurance
+55,Expired tag 4 months or less,4,License/Registration/Insurance
+56,Expired tag more than 4 months,4,License/Registration/Insurance
+57,No registration,4,License/Registration/Insurance
+58,Other Tag/Registration Violations,4,License/Registration/Insurance
+101,Negligent Homicide,2,Motor Vehicle Serious
+104,DUI,2,Motor Vehicle Serious
+105,DUI Per Se,2,Motor Vehicle Serious
+106,Reckless Driving,2,Motor Vehicle Serious
+107,Careless Driving,2,Motor Vehicle Serious
+109,Truck Speed,5,Commercial
+111,Speed Over Legal,1,Motor Vehicle Hazardous
+112,Speed Basic Rule,1,Motor Vehicle Hazardous
+113,Open Container,7,Other
+115,Right of Way,1,Motor Vehicle Hazardous
+120,Follow to Close,1,Motor Vehicle Hazardous
+125,Driving Over Centerline,1,Motor Vehicle Hazardous
+126,Improper Lane Travel,1,Motor Vehicle Hazardous
+127,Driving on Shoulder,1,Motor Vehicle Hazardous
+128,Crossing Divider/Barrier,1,Motor Vehicle Hazardous
+130,Improper Passing,1,Motor Vehicle Hazardous
+135,Fail to/Improper Signal,1,Motor Vehicle Hazardous
+140,Improper Turn,1,Motor Vehicle Hazardous
+145,Fail to Stop-Sign or Light,1,Motor Vehicle Hazardous
+146,Restrictive Sign,1,Motor Vehicle Hazardous
+150,Hit and Run,2,Motor Vehicle Serious
+155,Fail to Dim Headlights,1,Motor Vehicle Hazardous
+160,Light Violations,1,Motor Vehicle Hazardous
+166,Defective Brakes,3,Equipment
+168,Other Defective Equipment,3,Equipment
+170,Parking Violation,7,Other
+175,Pedestrian,6,Non-Motor Vehicle
+180,Bicycle,6,Non-Motor Vehicle
+182,Seatbelt,1,Motor Vehicle Hazardous
+183,Child Restraint,1,Motor Vehicle Hazardous
+190,Other Hazardous,7,Other
+202,Drivers License,4,License/Registration/Insurance
+204,Suspended or Revoked D/L,4,License/Registration/Insurance
+206,Vehicle License,4,License/Registration/Insurance
+207,One License Plate,4,License/Registration/Insurance
+208,Foreign License,4,License/Registration/Insurance
+210,Throwing Debris,5,Commercial
+212,Throwing Lighted Materials,5,Commercial
+214,Over Legal or Tolerance,2,Motor Vehicle Serious
+216,Over Axle,5,Commercial
+218,Over Tires,5,Commercial
+220,Over License Capacity,5,Commercial
+222,No Valid GVW,5,Commercial
+224,Over Length,5,Commercial
+226,Over Width,5,Commercial
+228,Over Height,5,Commercial
+232,Deffective Exhaust,3,Equipment
+234,Excessive Smoke,7,Other
+235,Log Book,5,Commercial
+240,Insurance,4,License/Registration/Insurance
+245,Other non-hazardous,7,Other
+262,Intoxicated Pedestrian,6,Non-Motor Vehicle
+265,Illegal Possession of Liquor,7,Other
+270,Furnishing Liquor to Minors,7,Other
+272,Motor Vehicle Theft,2,Motor Vehicle Serious
+275,Vehicle Dealer,7,Other
+280,Wrecker Yard,7,Other
+282,Drugs,2,Motor Vehicle Serious
+296,Other,7,Other
+299,CMV Inspection,5,Commercial
+16j,Juvenile .02 BAC Suspension,4,License/Registration/Insurance
+230,Fuel Permit,5,Commercial
+300,Size and Weight,5,Commercial
+301,Dyed Fuel,5,Commercial
